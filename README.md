@@ -25,6 +25,9 @@ library("sesame")
 
 # 450k and EPIC arrays:
 
+RGset <- read.metharray(basenames, verbose = TRUE)
+MSet <- preprocessIllumina(RGset)
+
 #EPICv2 arrays, mouse arrays or IDATs from multiple arrays generations:
 
 sdfs = openSesame(idat_dir, prep = "QCDPB", func = NULL)
@@ -36,7 +39,10 @@ The intensity values from the 'methylated' and 'unmethylated' channels are combi
 ```R
 # 450k and EPIC:
 
+load.data <. CNV.load(MSet)
+
 #EPICv2 arrays, mouse arrays or IDATs from multiple arrays generations:
+
 combined.intensities <- totalIntensities(sdfs) #for one sample
 combined.intensities <- lapply(sdfs, totalIntensities) #for multiple samples
 load.data <- CNV.load(combined.intensities)
