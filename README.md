@@ -122,7 +122,10 @@ Text output is generated using the `CNV.write` method. Parameter what specifies 
 
 For bug-reports, comments and feature requests please reach out via this GitHub repository. If you work with our package, please consider citing: 
 
-Bjarne Daenekas, Eilís Pérez, Fabio Boniolo, Sabina Stefan, Salvatore Benfatto, Martin Sill, Dominik Sturm, David T W Jones, David Capper, Marc Zapatka, Volker Hovestadt, Conumee 2.0: enhanced copy-number variation analysis from DNA methylation arrays for humans and mice, Bioinformatics, Volume 40, Issue 2, February 2024, btae029, https://doi.org/10.1093/bioinformatics/btae029
+Bjarne Daenekas, Eilís Pérez, Fabio Boniolo, Sabina Stefan, Salvatore Benfatto, Martin Sill, Dominik Sturm, David T W Jones, David Capper, Marc Zapatka, Volker Hovestadt, Conumee 2.0: enhanced copy-number variation analysis from DNA methylation arrays for humans and mice, Bioinformatics, Volume 40, Issue 2, February 2024, btae029, https://doi.org/10.1093/bioinformatics/btae029  
+
+***
+We thank Maximilian Leitheiser and Philipp Jurmeister for their thorough review of our code, bug fixes and helpful feedback. 
 
 
 
