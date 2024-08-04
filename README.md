@@ -73,10 +73,10 @@ The intensity values from the 'methylated' and 'unmethylated' channels are combi
 #EPICv2 arrays, mouse arrays or IDATs from multiple arrays generations:
 
 combined.intensities.q <- lapply(sdfs.q, totalIntensities) #lapply for for multiple samples
-load.data <- CNV.load(combined.intensities.q) #query samples
+load.data <- CNV.load(combined.intensities.q) 
 
 combined.intensities.c <- lapply(sdfs.c, totalIntensities) 
-load.control <- CNV.load(combined.intensities.c) #control samples
+load.control <- CNV.load(combined.intensities.c) 
 
 combined.intensities <- totalIntensities(sdfs) #command for one sample (not applicable for this example)
 load.data <- CNV.load(combined.intensities)
