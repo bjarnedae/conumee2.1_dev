@@ -16,28 +16,29 @@ devtools::install_github("hovestadtlab/conumee2", subdir = "conumee2")
 
 ### 1.1 Download test data
 
-In this tutorial, we will analyze 3 Glioblastoma samples (EPICv2) by comparing their CNV profile against 3 normal blood samples (EPIC). For tangent normalization, we recommend using a set of at least 16 copy-number neutral control samples, ideally generated using the same experimental pipelines, and from a related biological tissue (e.g. normal human brain tissues as a control for brain tumors samples). However, we have achieved good results even with control samples that were unrelated to the query cohort. Additionally, we recommend to preprocess query and control samples in the same way (both with minfi *or* both with SeSAMe). 
+In this tutorial, we will analyze two Glioblastoma samples (EPICv2). For tangent normalization, we recommend using a set of at least 16 copy-number neutral control samples, ideally generated using the same experimental pipelines, and from a related biological tissue (e.g. normal human brain tissues as a control for brain tumors samples). However, we have achieved good results even with control samples that were unrelated to the query cohort. Additionally, we recommend to preprocess query and control samples in the same way (both with minfi *or* both with SeSAMe). Here, we use three control samples from the frontal cortex (450k).
 
 ```R
 library("TCGAbiolinks")
 library("GEOquery")
 
-# downloading query samples (3 Glioblastoma samples from TCGA, EPICv2)
+# downloading query samples (2 Glioblastoma samples from GDC, EPICv2)
 
 query <- GDCquery(project = "CPTAC-3",
                   data.category = "DNA Methylation",
                   data.type = "Masked Intensities",
                   platform = "Illumina Methylation Epic v2",
-                  barcode = c("CPT021867000", "CPT012742000", "CPT000138000"))
+                  barcode = c("CPT012742000", "CPT017158001"))
+
 GDCdownload(query)
 
 file.copy(from = list.files(paste(getwd(), "GDCdata", sep ="/"), full.names = TRUE, recursive = TRUE), # moving IDAT files into one folder
           to = paste(getwd(), "/GDCdata/CPTAC-3/DNA_Methylation/Masked_Intensities", sep = ""))
 idat_dir_q <- paste(getwd(), "/GDCdata/CPTAC-3/DNA_Methylation/Masked_Intensities", sep = "")
 
-# downloading control samples (3 normal blood samples, EPIC)
+# downloading control samples (3 normal brain samples, 450k)
 
-GEOs <- c("GSM2694067", "GSM2694069", "GSM2694071")
+GEOs <- c("GSM2403235", "GSM2403236", "GSM2403237") 
 for( i in 1:3){
   getGEOSuppFiles(GEO = GEOs[i], makeDirectory = FALSE)
 }
