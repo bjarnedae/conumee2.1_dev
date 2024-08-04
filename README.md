@@ -154,9 +154,17 @@ The package supports multiple types of plots:
 ```R
 CNV.genomeplot(x)
 ```
-! [genomeplot_examples] (https://github.com/bjarnedae/conumee2.1_dev/blob/main/conumee2/vignettes/40afa67d-f399-4ca7-8d88-beadb9b2f6ad_noid_genomeplot.png)
+
+![40afa67d-f399-4ca7-8d88-beadb9b2f6ad_noid_genomeplot](https://github.com/user-attachments/assets/db576f98-8848-4dec-b6e6-8c2eaa9e597f)
 
 - The `CNV.detailplot` methods produces plots of individual detail regions, as defined in `CNV.create_anno`. Intensity values of individual probes are plotted in colored crosses. Bins are shown as black lines. Segments overlapping the detail regions are shown in blue. `CNV.detailplot_wrap` is a wrapper function that produces a single plot of all detail regions.
+
+```R
+CNV.detailplot(x, name = "EGFR")
+CNV.detailplot_wrap(x)
+```
+![40afa67d-f399-4ca7-8d88-beadb9b2f6ad_noid_EGFR](https://github.com/user-attachments/assets/c83acb96-51ed-4811-aa05-66899c2ce40a)
+![40afa67d-f399-4ca7-8d88-beadb9b2f6ad_noid_detailplot_wrap](https://github.com/user-attachments/assets/71decfcb-16e1-4f87-ae0e-c9cf822442ea)
 
 - `CNV.plotly` creates an interactive genomeplot with annotated genes for each bin.
 
@@ -175,6 +183,7 @@ Text output is generated using the `CNV.write` method. Parameter what specifies 
 ```R
 segments <- CNV.write(x, what = "segments")
 ```
+
 
 ## 4. Contact and citation
 
