@@ -338,7 +338,7 @@ setGeneric("CNV.detailplot", function(object, ...) {
 
 #' @rdname CNV.detailplot
 setMethod("CNV.detailplot", signature(object = "CNV.analysis"),
-          function(object, name, yaxt = "l", ylim = c(-1.25, 1.25), set_par = TRUE, output = NULL, columns = NULL, main = NULL,
+          function(object, name, yaxt = "l", ylim = c(-1.25, 1.25), set_par = TRUE, output = "NULL", columns = NULL, main = NULL,
                    directory = getwd(), width = 12, height = 8, res = 720, cols = c("darkblue","darkblue", "lightgrey", "#F16729", "#F16729")) {
 
             if (!is.element(name, values(object@anno@detail)$name))
@@ -492,7 +492,7 @@ setGeneric("CNV.detailplot_wrap", function(object, ...) {
 
 #' @rdname CNV.detailplot_wrap
 setMethod("CNV.detailplot_wrap", signature(object = "CNV.analysis"), function(object,
-                                                                              set_par = TRUE, main = NULL, header = NULL, output = NULL, directory = getwd(), width = 12, height = 8, res = 720,...) {
+                                                                              set_par = TRUE, main = NULL, header = NULL, output = "NULL", directory = getwd(), width = 12, height = 8, res = 720,...) {
   if (length(object@fit) == 0)
     stop("fit unavailable, run CNV.fit")
   if (length(object@bin) == 0)
@@ -980,15 +980,13 @@ setMethod("CNV.write", signature(object = "CNV.analysis"), function(object, file
       }
     }
   } else if (w == 7){
-    if (length(object@detail$sig.genes) == 0)
-      stop("Please run CNV.focal")
     x <- vector(mode='list', length = 6)
     x[[1]] <- object@detail$amp.bins
     x[[2]] <- object@detail$del.bins
-    x[[3]] <- object@detail$detail.regions.amp
-    x[[4]] <- object@detail$detail.regions.del
-    x[[5]] <- object@detail$cancer.genes.amp
-    x[[6]] <- object@detail$cancer.genes.del
+    x[[3]] <- object@detail$amp.detail.regions
+    x[[4]] <- object@detail$del.detail.regions
+    x[[5]] <- object@detail$amp.cancer.genes
+    x[[6]] <- object@detail$del.cancer.genes
     names(x) <- c("bins within amplified regions", "bins within lost regions", "amplified detail regions",
                   "deleted detail regions", "amplified genes from the Cancer Gene Census", "deleted genes from the Cancer Gene Census")
   } else{
