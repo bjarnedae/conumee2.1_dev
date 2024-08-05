@@ -134,7 +134,7 @@ x <- CNV.segment(x)
 
 Primarily designed for assessing the methylation status of specific loci, we repurpose the arrays to infer genomic copy-number changes. Notably, the microarrays are susceptible to noise and batch effects, which we aim to minimize with our analystical pipeline. However, it is important to acknowledge that methylation-based CNV detection is less sensitive than other methods and tends to provide inferential rather than definitive identification of CNVs, particularly for focal events. Therefore, we highly recommend validating positive findings with other methods, especially in clinical settings. 
 
-The function `CNV.focal`is optional. It detects focal alterations within the predefined `detail_regions`. Complementary to this automatic calling, dedicated plots (created with `CNV.detailplot` may be helpful to decide if a focal region is significantly altered (see below). 
+The function `CNV.focal`is optional. It detects focal alterations within the predefined `detail_regions`. Complementary to this automatic calling, dedicated plots (created with `CNV.detailplot` may be helpful to decide if a focal region is significantly altered (see below)). 
 
 - Argument `sig_cgenes` is optional. It allows to assess the copy-number state for over 700 frequently altered genes from The Cancer Gene Census. Please be aware that the high number of genes may lead to false positive results.
 
