@@ -86,7 +86,7 @@ load.data <- CNV.load(combined.intensities)
 
 # command for 450k and EPIC arrays:
 
-load.data <. CNV.load(MSet)
+load.data <- CNV.load(MSet)
 ```
 ### 1.4 Create annotation object
 
