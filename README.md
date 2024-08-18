@@ -86,7 +86,7 @@ load.data <- CNV.load(combined.intensities)
 
 # command for 450k and EPIC arrays:
 
-load.data <. CNV.load(MSet)
+load.data <- CNV.load(MSet)
 ```
 ### 1.4 Create annotation object
 
@@ -134,7 +134,7 @@ x <- CNV.segment(x)
 
 Primarily designed for assessing the methylation status of specific loci, we repurpose the arrays to infer genomic copy-number changes. Notably, the microarrays are susceptible to noise and batch effects, which we aim to minimize with our analystical pipeline. However, it is important to acknowledge that methylation-based CNV detection is less sensitive than other methods and tends to provide inferential rather than definitive identification of CNVs, particularly for focal events. Therefore, we highly recommend validating positive findings with other methods, especially in clinical settings. 
 
-The function `CNV.focal`is optional. It detects focal alterations within the predefined `detail_regions`. Complementary to this automatic calling, dedicated plots (created with `CNV.detailplot` may be helpful to decide if a focal region is significantly altered (see below). 
+The function `CNV.focal`is optional. It detects focal alterations within the predefined `detail_regions`. Complementary to this automatic calling, dedicated plots (created with `CNV.detailplot` may be helpful to decide if a focal region is significantly altered (see below)). 
 
 - Argument `sig_cgenes` is optional. It allows to assess the copy-number state for over 700 frequently altered genes from The Cancer Gene Census. Please be aware that the high number of genes may lead to false positive results.
 
@@ -151,7 +151,20 @@ The package supports multiple types of plots:
 
 - The `CNV.genomeplot` method produces plots of the complete genome or of one or multiple chromosomes. Intensity values of each bin are plotted in colored dots. Segments are shown as blue lines. If `CNV.focal` was used, significant genes are highlighted in red. See `?CNV.genomeplot` for more details.
 
+```R
+CNV.genomeplot(x)
+```
+
+![40afa67d-f399-4ca7-8d88-beadb9b2f6ad_noid_genomeplot](https://github.com/user-attachments/assets/db576f98-8848-4dec-b6e6-8c2eaa9e597f)
+
 - The `CNV.detailplot` methods produces plots of individual detail regions, as defined in `CNV.create_anno`. Intensity values of individual probes are plotted in colored crosses. Bins are shown as black lines. Segments overlapping the detail regions are shown in blue. `CNV.detailplot_wrap` is a wrapper function that produces a single plot of all detail regions.
+
+```R
+CNV.detailplot(x, name = "EGFR")
+CNV.detailplot_wrap(x)
+```
+![40afa67d-f399-4ca7-8d88-beadb9b2f6ad_noid_EGFR](https://github.com/user-attachments/assets/c83acb96-51ed-4811-aa05-66899c2ce40a)
+![40afa67d-f399-4ca7-8d88-beadb9b2f6ad_noid_detailplot_wrap](https://github.com/user-attachments/assets/71decfcb-16e1-4f87-ae0e-c9cf822442ea)
 
 - `CNV.plotly` creates an interactive genomeplot with annotated genes for each bin.
 
@@ -170,6 +183,7 @@ Text output is generated using the `CNV.write` method. Parameter what specifies 
 ```R
 segments <- CNV.write(x, what = "segments")
 ```
+
 
 ## 4. Contact and citation
 
