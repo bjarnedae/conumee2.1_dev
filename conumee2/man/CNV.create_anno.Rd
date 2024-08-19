@@ -10,7 +10,7 @@ CNV.create_anno(
   bin_maxsize = 5e+06,
   array_type = "450k",
   genome = "hg19",
-  features = "cg",
+  features = "all",
   exclude_regions = NULL,
   detail_regions = NULL,
   chrXY = FALSE

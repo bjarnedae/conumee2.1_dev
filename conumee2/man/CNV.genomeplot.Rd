@@ -15,7 +15,7 @@ CNV.genomeplot(object, ...)
   main = NULL,
   sig_cgenes = FALSE,
   nsig_cgenes = 3,
-  output = "output",
+  output = "local",
   directory = getwd(),
   ylim = c(-1.25, 1.25),
   bins_cex = 0.75,
@@ -43,7 +43,7 @@ CNV.genomeplot(object, ...)
 
 \item{nsig_cgenes}{numeric. How many significant genes identified with \code{CNV.focal} should be plotted? Default to \code{3}. We do not recommend using values higher than 5 in order to avoid false positive results.}
 
-\item{output}{character. Choose between \code{output} (to display it in the graphical output) or \code{pdf} and \code{png} to save it. Defaults to \code{output}.}
+\item{output}{character. Choose between \code{output} (to display it in the graphical output) or \code{pdf} and \code{png} to save it. Defaults to \code{local}.}
 
 \item{directory}{character. Export directory for saving the files}
 

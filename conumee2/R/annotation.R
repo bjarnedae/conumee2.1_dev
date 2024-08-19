@@ -1,10 +1,6 @@
 ##### ANNOTATION methods #####
 
 #' @import minfi
-#' @import IlluminaHumanMethylation450kmanifest
-#' @import IlluminaHumanMethylation450kanno.ilmn12.hg19
-#' @import IlluminaHumanMethylationEPICmanifest
-#' @import IlluminaHumanMethylationEPICanno.ilm10b4.hg19
 #' @import GenomicRanges
 #' @import IRanges
 #' @import GenomeInfoDb
@@ -31,7 +27,7 @@ NULL
 #' @author Volker Hovestadt \email{conumee@@hovestadt.bio}, Bjarne Daenekas
 #' @export
 CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize = 5e+06,
-                            array_type = "450k", genome = "hg19", features = "cg", exclude_regions = NULL, detail_regions = NULL, chrXY = FALSE) {
+                            array_type = "450k", genome = "hg19", features = "all", exclude_regions = NULL, detail_regions = NULL, chrXY = FALSE) {
   object <- new("CNV.anno")
   object@date <- date()
 
@@ -43,12 +39,14 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
   if (is.null(array_type)) {
     array_type <- "450k"
   }
-  if (!is.element(array_type, c("450k", "EPIC","EPICv2", "mouse","overlap.1", "overlap.2", "overlap.3"))) {
-    stop("array_type must be one of 450k, EPIC, EPICv2, mouse, overlap.1, overlap.2 or overlap.3")
+  if (!all(is.element(array_type, c("450k", "EPIC", "EPICv2", "mouse")))) {
+    stop("array_type must be one/multiple of 450k, EPIC, EPICv2, or mouse")
+  }
+  if (is.element("mouse", array_type) & length(array_type) > 1) {
+    stop("cannot mix mouse and human arrays")
   }
 
-  if(is.element(array_type, c("450k", "EPIC", "EPICv2", "overlap.1", "overlap.2", "overlap.3"))) {
-
+  if(all(is.element(array_type, c("450k", "EPIC", "EPICv2")))) {   # human annotations
     if (chrXY) {
       object@genome <- data.frame(chr = paste("chr", c(1:22, "X", "Y"),
                                               sep = ""), stringsAsFactors = FALSE)
@@ -56,7 +54,6 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
       object@genome <- data.frame(chr = paste("chr", 1:22, sep = ""),
                                   stringsAsFactors = FALSE)
     }
-
     rownames(object@genome) <- object@genome$chr
 
     if (genome == "hg19") {
@@ -65,10 +62,10 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
     }
 
     if (genome == "hg38") {
-      if (!array_type == "EPICv2") {
+      if (!is.element("EPICv2", array_type)) {
         stop("only the EPICv2 array supports the hg38 annotation")
       }
-      # data("tbl_ucsc_hg38")
+      data("tbl_ucsc_hg38")
       message("using hg38 genome annotations from UCSC")
       tbl <- tbl_ucsc_hg38
     }
@@ -98,64 +95,55 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
                                                     seqinfo = Seqinfo(object@genome$chr, object@genome$size)), 1, fix = "center")))
     }
 
-    probes450k <- probesEPIC <- probesEPICv2 <- GRanges()
-    if (is.element(array_type, c("450k", "overlap.1", "overlap.3"))) {
-      message("getting 450k annotations")
-      data("UCSC_RefGene_Name_450k")
-      probes450k <- minfi::getLocations(IlluminaHumanMethylation450kanno.ilmn12.hg19::IlluminaHumanMethylation450kanno.ilmn12.hg19)
-      probes450k$genes <- UCSC_RefGene_Name_450k
-      probes450k <- sort(probes450k)
+    data("probes")
+
+    if (is.element("450k", array_type)) {
+      message("loading 450k annotations")
     }
 
-    if (is.element(array_type, c("EPIC", "overlap.1", "overlap.2", "overlap.3"))) {
-      message("getting EPIC annotations")
-      data("UCSC_RefGene_Name_EPIC")
-      probesEPIC <- minfi::getLocations(IlluminaHumanMethylationEPICanno.ilm10b4.hg19::IlluminaHumanMethylationEPICanno.ilm10b4.hg19)
-      probesEPIC$genes <- UCSC_RefGene_Name_EPIC
-      probesEPIC <- sort(probesEPIC)
+    if (is.element("EPIC", array_type)) {
+      message("loading EPIC annotations")
     }
 
-    if(genome == "hg19"){
-      if (is.element(array_type, c("EPICv2", "overlap.2", "overlap.3"))) {
-        message("getting EPICv2 annotations")
-        data("EPICv2_hg19_probes")
-        probesEPICv2 <- sort(EPICv2_hg19_probes)
-      }
-    } else if(genome == "hg38"){
-      if (is.element(array_type, "EPICv2")) {
-        message("getting EPICv2 annotations (hg38)")
-        data("EPICv2_hg38_probes")
-        probesEPICv2 <- sort(EPICv2_hg38_probes)
+    if (is.element("EPICv2", array_type)) {
+      if(genome == "hg19"){
+        message("loading EPICv2 annotations")
+      } else if(genome == "hg38"){
+        message("loading EPICv2 annotations (hg38)")
+        probesEPICv2 <- probesEPICv2.hg38
       }
     }
 
-    if (array_type == "overlap.1") {
-      probes <- sort(subsetByOverlaps(probes450k, probesEPIC))
-    } else if (array_type == "overlap.2") {
-      data("probes_overlap_EPIC_EPICv2")
-      probes <- probes_overlap_EPIC_EPICv2
-    } else if (array_type == "overlap.3") {
-      data("probes_overlap_EPIC_EPICv2")
-      probes <- sort(subsetByOverlaps(probes450k, probes_overlap_EPIC_EPICv2))
-    } else {
-      probes <- unique(sort(c(probes450k, probesEPIC, probesEPICv2)))
+    if (all(array_type=="450k")) {
+      probes <- probes450k
+    } else if (all(array_type %in% "EPIC")) {
+      probes <- probesEPIC
+    } else if (all(array_type %in% "EPICv2")) {
+      probes <- probesEPICv2
+      probes$EPICv1_Loci <- probes$Methyl450_Loci <- NULL
+    } else if (all(array_type %in% c("450k", "EPIC"))) {
+      probes <- probes450k[intersect(names(probes450k), names(probesEPIC))]
+    } else if (all(array_type %in% c("450k", "EPICv2"))) {
+      probes <- probesEPICv2[probesEPICv2$Methyl450_Loci != ""]
+      probes$EPICv1_Loci <- probes$Methyl450_Loci <- NULL
+    } else if (all(array_type %in% c("EPIC", "EPICv2"))) {
+      probes <- probesEPICv2[probesEPICv2$EPICv1_Loci != ""]
+      probes$EPICv1_Loci <- probes$Methyl450_Loci <- NULL
+    } else if (all(array_type %in% c("450k", "EPIC", "EPICv2"))) {
+      probes <- probesEPICv2[probesEPICv2$Methyl450_Loci != "" & probesEPICv2$EPICv1_Loci != ""]
+      probes$EPICv1_Loci <- probes$Methyl450_Loci <- NULL
     }
 
-    if(features == "cg"){
-      # CpG probes only
-      ao_probes <- probes[substr(names(probes), 1, 2) == "cg" & is.element(as.vector(seqnames(probes)), object@genome$chr)]
-      object@probes <- sort(GRanges(as.vector(seqnames(ao_probes)), ranges(ao_probes),
-                                    seqinfo = Seqinfo(object@genome$chr, object@genome$size), genome = genome))
-      object@probes$genes <- ao_probes$genes
-    } else {
-      ao_probes <- probes[features]
-      object@probes <- sort(GRanges(as.vector(seqnames(ao_probes)), ranges(ao_probes),
-                                    seqinfo = Seqinfo(object@genome$chr, object@genome$size), genome = genome))
-      object@probes$genes <- ao_probes$genes
+    if(features == "all"){
+      object@probes <- sort(probes)
+      message(" - ", length(object@probes), " probes used")
+    }else{
+      object@probes <- sort(probes[features])
+      message(" - ", length(object@probes), " probes used")
     }
 
+    object@probes <- sort(probes)
     message(" - ", length(object@probes), " probes used")
-
 
     if (!is.null(exclude_regions)) {
       message("importing regions to exclude from analysis")
@@ -227,7 +215,7 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
 
     return(object)
 
-  } else if (array_type == "mouse"){ #mouse beginning
+  } else if (array_type == "mouse") { # mouse annotations
 
     data("mouse_annotation")
 
@@ -330,8 +318,7 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
     object@bins$genes <- bin_genes
 
     return(object)
-  } #mouse end
-
+  }
 }
 
 

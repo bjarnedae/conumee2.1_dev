@@ -27,7 +27,7 @@
 #' @param set_par logical. Use recommended graphical parameters for \code{oma} and \code{mar}? Defaults to \code{TRUE}. Original parameters are restored afterwards.
 #' @param cols character vector. Colors to use for plotting intensity levels of bins. Centered around 0. Defaults to \code{c("darkblue","darkblue", "lightgrey", "#F16729", "#F16729")}.
 #' @param directory character. Export directory for saving the files
-#' @param output character. Choose between \code{output} (to display it in the graphical output) or \code{pdf} and \code{png} to save it. Defaults to \code{output}.
+#' @param output character. Choose between \code{output} (to display it in the graphical output) or \code{pdf} and \code{png} to save it. Defaults to \code{local}.
 #' @param width numeric. Width in inches of the saved files. Defaults to \code{12}.
 #' @param height numeric. Height in inches of the saved files. Defaults to \code{8}
 #' @param res numeric. Resolution of the saved .png files. Defaults to \code{720}
@@ -67,7 +67,7 @@ setGeneric("CNV.genomeplot", function(object, ...) {
 
 #' @rdname CNV.genomeplot
 setMethod("CNV.genomeplot", signature(object = "CNV.analysis"), function(object, chr = "all", centromere = TRUE, detail = TRUE,
-                                                                         main = NULL, sig_cgenes = FALSE, nsig_cgenes = 3, output = "output", directory = getwd(), ylim = c(-1.25, 1.25),
+                                                                         main = NULL, sig_cgenes = FALSE, nsig_cgenes = 3, output = "local", directory = getwd(), ylim = c(-1.25, 1.25),
                                                                          bins_cex = 0.75, set_par = TRUE,
                                                                          width = 12, height = 6, res = 720, cols = c("darkblue","darkblue", "lightgrey", "#F16729", "#F16729")){
 
@@ -107,7 +107,7 @@ setMethod("CNV.genomeplot", signature(object = "CNV.analysis"), function(object,
 
     if(output == "png"){
       p_names <- paste(directory,"/", main[i],"_genomeplot",".png",sep="")
-      png(p_names, units = "in", width = width, height = height, res = res)
+      png(p_names[i], units = "in", width = width, height = height, res = res)
       par(mfrow = c(1, 1), mar = c(4, 4, 4, 4), oma = c(0, 0, 0, 0))
     }
 
@@ -296,7 +296,7 @@ setMethod("CNV.genomeplot", signature(object = "CNV.analysis"), function(object,
 #' @param yaxt character. Include y-axis? \code{'l'}: left, \code{'r'}: right, \code{'n'}: no. Defaults to \code{'l'}.
 #' @param ylim numeric vector. The y limits of the plot. Defaults to \code{c(-1.25, 1.25)}.
 #' @param directory character. Export directory for saving the files
-#' @param output character. Choose between \code{pdf} and \code{png}. Defaults to \code{NULL}
+#' @param output character. Choose between \code{pdf} and \code{png}. Defaults to \code{local}
 #' @param width numeric. Width in inches of the saved files. Defaults to \code{12}.
 #' @param height numeric. Height in inches of the saved files. Defaults to \code{8}
 #' @param res numeric. Resolution of the saved .png files. Defaults to \code{720}
@@ -338,7 +338,7 @@ setGeneric("CNV.detailplot", function(object, ...) {
 
 #' @rdname CNV.detailplot
 setMethod("CNV.detailplot", signature(object = "CNV.analysis"),
-          function(object, name, yaxt = "l", ylim = c(-1.25, 1.25), set_par = TRUE, output = "NULL", columns = NULL, main = NULL,
+          function(object, name, yaxt = "l", ylim = c(-1.25, 1.25), set_par = TRUE, output = "local", columns = NULL, main = NULL,
                    directory = getwd(), width = 12, height = 8, res = 720, cols = c("darkblue","darkblue", "lightgrey", "#F16729", "#F16729")) {
 
             if (!is.element(name, values(object@anno@detail)$name))
@@ -375,7 +375,7 @@ setMethod("CNV.detailplot", signature(object = "CNV.analysis"),
 
               if(output == "png"){
                 p_names <- paste(directory,"/",colnames(object@fit$ratio),"_",name,".png",sep="")
-                png(p_names, units = "in", width = width, height = height, res = res)
+                png(p_names[i], units = "in", width = width, height = height, res = res)
                 par(mfrow = c(1, 1), mar = c(4, 4, 4, 4), oma = c(0, 0, 0, 0))
               }
 
@@ -437,7 +437,7 @@ setMethod("CNV.detailplot", signature(object = "CNV.analysis"),
             }
 
             if(is.element(output, c("pdf", "png"))){
-              message("files are stored in the directory")
+              message(paste(ncol(object@fit$ratio)," files were created.", sep = ""))
             }
 
             if (set_par)
@@ -451,11 +451,11 @@ setMethod("CNV.detailplot", signature(object = "CNV.analysis"),
 #' @param object \code{CNV.analysis} object.
 #' @param set_par logical. Use recommended graphical parameters for \code{oma} and \code{mar}? Defaults to \code{TRUE}. Original parameters are restored afterwards.
 #' @param directory character. Export directory for saving the files
-#' @param output character. Choose between \code{pdf} and \code{png}. Defaults to \code{NULL}
+#' @param output character. Choose between \code{pdf} and \code{png}. Defaults to \code{local}
 #' @param width numeric. Width in inches of the saved files. Defaults to \code{12}.
 #' @param height numeric. Height in inches of the saved files. Defaults to \code{8}
 #' @param res numeric. Resolution of the saved .png files. Defaults to \code{720}
-#' @param main character. Used for \code{CNV.detailplot}. do not manipulate
+#' @param main character. Used for \code{CNV.detailplot}. Do not manipulate
 #' @param header character vector. Title of the plot(s). Defaults to sample names. Please provide a vector of the same length than the number of samples.
 #' @param ... Additional paramters supplied to \code{CNV.detailplot}.
 #' @return \code{NULL}.
@@ -492,7 +492,7 @@ setGeneric("CNV.detailplot_wrap", function(object, ...) {
 
 #' @rdname CNV.detailplot_wrap
 setMethod("CNV.detailplot_wrap", signature(object = "CNV.analysis"), function(object,
-                                                                              set_par = TRUE, main = NULL, header = NULL, output = "NULL", directory = getwd(), width = 12, height = 8, res = 720,...) {
+                                                                              set_par = TRUE, main = NULL, header = NULL, output = "local", directory = getwd(), width = 12, height = 8, res = 720,...) {
   if (length(object@fit) == 0)
     stop("fit unavailable, run CNV.fit")
   if (length(object@bin) == 0)
@@ -552,6 +552,10 @@ setMethod("CNV.detailplot_wrap", signature(object = "CNV.analysis"), function(ob
     }
   }
 
+  if(is.element(output, c("pdf", "png"))){
+    message(paste(ncol(object@fit$ratio)," files were created.", sep = ""))
+  }
+
   if (set_par) {
     par(mfrow = mfrow_original, mar = mar_original, oma = oma_original)
   }
@@ -563,6 +567,12 @@ setMethod("CNV.detailplot_wrap", signature(object = "CNV.analysis"), function(ob
 #' @param set_par logical. Use recommended graphical parameters for \code{oma} and \code{mar}? Defaults to \code{TRUE}. Original parameters are restored afterwards.
 #' @param main character. Specify the title of the plot. Defaults to \code{NULL}.
 #' @param threshold numeric. Threshold for determining the copy number state. Defaults to \code{0.1}. See Details for details.
+#' @param output character. Choose between \code{output} (to display it in the graphical output) or \code{pdf} and \code{png} to save it. Defaults to \code{local}.
+#' @param directory character. Export directory for saving the files
+#' @param output character. Choose between \code{output} (to display it in the graphical output) or \code{pdf} and \code{png} to save it. Defaults to \code{local}.
+#' @param width numeric. Width in inches of the saved files. Defaults to \code{12}.
+#' @param height numeric. Height in inches of the saved files. Defaults to \code{8}
+#' @param res numeric. Resolution of the saved .png files. Defaults to \code{720}
 #' @param ... Additional parameters (\code{CNV.write} generic, currently not used).
 #' @details This function creates a plot that illustrates the changes in copy number states within the set of query samples that are stored in the \code{CNV.analysis} object. The y axis is showing the percentage of samples that are exhibiting a CNV at the genomic location shown on the x axis. The threshold for the log2-ratio to identify gains or losses is \code{0.1} by default.
 #' @return \code{NULL}
@@ -599,7 +609,7 @@ setGeneric("CNV.summaryplot", function(object, ...) {
 
 #' @rdname CNV.summaryplot
 setMethod("CNV.summaryplot", signature(object = "CNV.analysis"), function(object,
-                                                                          set_par = TRUE, main = NULL, threshold = 0.1,...) {
+                                                                          set_par = TRUE, main = NULL, output = "local", directory = getwd(), width = 12, height = 6, res = 720, threshold = 0.1,...) {
 
   if (set_par) {
     mfrow_original <- par()$mfrow
@@ -611,16 +621,30 @@ setMethod("CNV.summaryplot", signature(object = "CNV.analysis"), function(object
     stop("Please use multiple query samples to ceate a summaryplot")
   }
 
-  y <- CNV.write(object, what = "overview", threshold = threshold)
+  if(output == "pdf"){
+    p_names <- paste(directory,"/","genome_summaryplot",".pdf",sep="")
+    pdf(p_names, width = width, height = height)
+    par(mfrow = c(1, 1), mar = c(4, 4, 4, 4), oma = c(0, 0, 0, 0))
+  }
+
+  if(output == "png"){
+    p_names <- paste(directory,"/", "genome_summaryplot",".png",sep="")
+    png(p_names, units = "in", width = width, height = height, res = res)
+    par(mfrow = c(1, 1), mar = c(4, 4, 4, 4), oma = c(0, 0, 0, 0))
+  }
+
+  y <- CNV.write(object, what = "threshold", threshold = threshold)
 
   message("creating summaryplot")
 
-  segments <- GRanges(seqnames=y$Chromosome,ranges=IRanges(y$Start_Position, y$End_Position))
+  segments.i <- GRanges(seqnames=y$Chromosome,ranges=IRanges(y$Start_Position, y$End_Position))
+  segments_chromosomes <- GRanges(seqnames = object@anno@genome$chr, ranges = IRanges(start = 1, end = object@anno@genome$size))
+  segments <- c(segments.i, segments_chromosomes)
   d_segments <-as.data.frame(GenomicRanges::disjoin(segments))
 
   overview <- as.data.frame(matrix(nrow = 0, ncol = 4))
   for (i in 1:nrow(d_segments)) {
-    x <- d_segments[i,] #change
+    x <- d_segments[i,]
     involved_segements <- y[y$Chromosome == x$seqnames & y$Start_Position <= x$start & y$End_Position >= x$end,]
     balanced <- sum(involved_segements$Alteration == "balanced")
     gain <- sum(involved_segements$Alteration == "gain")
@@ -628,6 +652,7 @@ setMethod("CNV.summaryplot", signature(object = "CNV.analysis"), function(object
     c(as.character(x$seqnames), balanced, gain, loss)
     overview <- rbind(overview, c(as.character(x$seqnames), balanced, gain, loss))
   }
+
   colnames(overview) <- c("disjoined_segment", "count_balanced", "count_gains", "count_losses")
   overview$count_balanced <- as.numeric(overview$count_balanced)
   overview$count_gains <- as.numeric(overview$count_gains)
@@ -644,33 +669,12 @@ setMethod("CNV.summaryplot", signature(object = "CNV.analysis"), function(object
   segments_pl$xpos[odd_indexes]<-segments_pl$start[odd_indexes]
   segments_pl$xpos[even_indexes]<-segments_pl$end[even_indexes]
 
-  beginning<-c("chr1",5,10,5,"*",0,0,0,5,1) #point on the x axis at the beginning (for closing the polygon)
-
-  if (!is.null(object@anno@genome$pq)) {
-    chrom_end <- data.frame(seqnames = paste("chr",1:22, sep = ""), start = object@anno@genome$size, #point on the x axis at the end of each chromosome
-                            end = object@anno@genome$size, width = 1, strand = "*", gains = 0, losses = 0, balanced = 0, xpos = object@anno@genome$size)
-  } else if (is.null(object@anno@genome$pq)) {
-    chrom_end <- data.frame(seqnames = paste("chr",1:19, sep = ""), start = object@anno@genome$size, #point on the x axis at the end of each chromosome
-                            end = object@anno@genome$size, width = 1, strand = "*", gains = 0, losses = 0, balanced = 0, xpos = object@anno@genome$size)
-  }
-
-  segments_pl <- rbind(segments_pl,beginning, chrom_end)
-
-  segments_pl$chromnum <- as.numeric(gsub("chr","",segments_pl$seqnames))
-  segments_pl <- segments_pl[order(segments_pl$chromnum, as.numeric(segments_pl$xpos)),]
-
-
-  segments_pl$start<-as.numeric(segments_pl$start)
-  segments_pl$end<-as.numeric(segments_pl$end)
-  segments_pl$xpos<-as.numeric(segments_pl$xpos)
-  segments_pl$losses<-as.numeric(segments_pl$losses)
-  segments_pl$gains<-as.numeric(segments_pl$gains)
-  segments_pl$balanced<-as.numeric(segments_pl$balanced)
+  segments_pl$seqnames <- factor(segments_pl$seqnames, levels = object@anno@genome$chr)
+  segments_pl <- segments_pl[order(segments_pl$seqnames, segments_pl$start),]
 
   par(mfrow = c(1, 1), mgp=c(4,1,0), mar = c(4, 8, 4, 4), oma = c(0, 0, 0, 0))
   plot(NA, xlim = c(0, sum(as.numeric(object@anno@genome$size))), ylim = c(-100, 100), xaxs = "i", xaxt = "n", yaxt = "n",
-       xlab = NA, ylab = "percentage of samples exhibiting the CNA [%]", main = main, cex=1.5, cex.lab=1, cex.axis=1, cex.main=1.5)
-
+       xlab = NA, ylab = "percentage of samples exhibiting the CNV [%]", main = main, cex=1.5, cex.lab=1, cex.axis=1, cex.main=1.5)
 
   abline(v = .cumsum0(object@anno@genome$size, right = TRUE),
          col = "grey")
@@ -678,7 +682,6 @@ setMethod("CNV.summaryplot", signature(object = "CNV.analysis"), function(object
          col = "grey", lty = 2)
   axis(1, at = .cumsum0(object@anno@genome$size) + object@anno@genome$size/2,
        labels = object@anno@genome$chr, las = 2)
-
 
   axis(2, las = 2, lty=1, at = seq(0, 100, 20), labels=abs(seq(0, 100, 20)),cex.axis=1)
   axis(2, las = 2, lty=1, at = seq(-100, 0, 20), labels=abs(seq(-100, 0, 20)),cex.axis=1)
@@ -689,12 +692,14 @@ setMethod("CNV.summaryplot", signature(object = "CNV.analysis"), function(object
   polygon(as.numeric(chr.cumsum0[match(segments_pl$seqnames, names(chr.cumsum0))]) + segments_pl$xpos, segments_pl$gains, col="#F16729",lwd=1.5)
   polygon(as.numeric(chr.cumsum0[match(segments_pl$seqnames, names(chr.cumsum0))]) + segments_pl$xpos, -segments_pl$loss, col="darkblue",lwd=1.5)
 
+  if(is.element(output, c("pdf", "png"))){
+    dev.off()
+    message("file was created")
+  }
 
   if (set_par)
     par(mfrow = mfrow_original, mar = mar_original, oma = oma_original)
-
 })
-
 
 #' CNV.heatmap
 #' @description Create a heatmap to illustrate CNVs in a set of query samples. Colors correspond to the other plots.
@@ -707,6 +712,12 @@ setMethod("CNV.summaryplot", signature(object = "CNV.analysis"), function(object
 #' @param cexRow numeric. Adjust the font size for row labeling. Default to 0.5.
 #' @param zlim numeric. The minimum and maximum z values for which colors should be plotted. Default to \code{c(-0.5,0.5)}.
 #' @param useRaster logical. Should a bitmap raster be used to create the plot instead of polygons? Default to \code{TRUE}.
+#' @param output character. Choose between \code{output} (to display it in the graphical output) or \code{pdf} and \code{png} to save it. Defaults to \code{local}.
+#' @param directory character. Export directory for saving the files
+#' @param output character. Choose between \code{output} (to display it in the graphical output) or \code{pdf} and \code{png} to save it. Defaults to \code{local}.
+#' @param width numeric. Width in inches of the saved files. Defaults to \code{12}.
+#' @param height numeric. Height in inches of the saved files. Defaults to \code{8}
+#' @param res numeric. Resolution of the saved .png files. Defaults to \code{720}
 #' @param ... Additional parameters
 #' @examples
 #' #' # prepare
@@ -741,7 +752,8 @@ setGeneric("CNV.heatmap", function(object, ...) {
 
 #' @rdname CNV.heatmap
 setMethod("CNV.heatmap", signature(object = "CNV.analysis"), function(object,
-                                                                      set_par = TRUE, main = NULL, hclust = TRUE, hclust_method = "average", dist_method = "euclidian", cexRow = 1/2, zlim = c(-0.5,0.5), useRaster = TRUE,...) {
+                                                                      set_par = TRUE, main = NULL, hclust = TRUE, hclust_method = "average", dist_method = "euclidian", cexRow = 1/2, zlim = c(-0.5,0.5), useRaster = TRUE, output = "local",
+                                                                      directory = getwd(), width = 8, height = 8, res = 720,...) {
 
   if (set_par) {
     mfrow_original <- par()$mfrow
@@ -752,6 +764,18 @@ setMethod("CNV.heatmap", signature(object = "CNV.analysis"), function(object,
   options(max.print = 1000)
   options(stringsAsFactors = FALSE)
   options(scipen = 999)
+
+  if(output == "pdf"){
+    p_names <- paste(directory,"/","genome_heatmap",".pdf",sep="")
+    pdf(p_names, width = width, height = height)
+    par(mfrow = c(1, 1), mar = c(4, 4, 4, 4), oma = c(0, 0, 0, 0))
+  }
+
+  if(output == "png"){
+    p_names <- paste(directory,"/", "genome_heatmap",".png",sep="")
+    png(p_names, units = "in", width = width, height = height, res = res)
+    par(mfrow = c(1, 1), mar = c(4, 4, 4, 4), oma = c(0, 0, 0, 0))
+  }
 
   bins <- CNV.write(object, what = "bins")
   annotation <- bins[,c(1:4)]
@@ -775,13 +799,16 @@ setMethod("CNV.heatmap", signature(object = "CNV.analysis"), function(object,
     heatmap(bins, Colv = NA, Rowv = as.dendrogram(bins.hc), scale="n", useRaster = useRaster, main = main,
             col = my_palette, cexRow = cexRow, zlim = zlim, add.expr = abline(v=b), labCol = ll, cexCol = 1)
 
-    if (set_par)
-      par(mfrow = mfrow_original, mar = mar_original, oma = oma_original)
-
   } else {
 
     heatmap(bins, Colv = NA, Rowv = NA, scale="n", useRaster = useRaster, main = main,
             col = my_palette, cexRow = cexRow, zlim = zlim, add.expr = abline(v=b), labCol = ll, cexCol = 1)
+
+  }
+
+  if(is.element(output, c("pdf", "png"))){
+    dev.off()
+    message("file was created")
 
     if (set_par)
       par(mfrow = mfrow_original, mar = mar_original, oma = oma_original)
@@ -795,7 +822,7 @@ setMethod("CNV.heatmap", signature(object = "CNV.analysis"), function(object,
 #' @description Output CNV analysis results as table.
 #' @param object \code{CNV.analysis} object.
 #' @param file Path where output file should be written to. Defaults to \code{NULL}: No file is written, table is returned as data.frame object.
-#' @param what character. This should be (an unambiguous abbreviation of) one of \code{'probes'}, \code{'bins'}, \code{'detail'}, \code{'segments'}, \code{gistic}, \code{overview} or \code{focal}. Defaults to \code{'segments'}.
+#' @param what character. This should be (an unambiguous abbreviation of) one of \code{'probes'}, \code{'bins'}, \code{'detail'}, \code{'segments'}, \code{gistic}, \code{threshold} (for CNV.summaryplot) or \code{focal}. Defaults to \code{'segments'}.
 #' @param threshold numeric. Threshold for determining the copy number state. Defaults to \code{0.1}. See Description for details.
 #' @param ... Additional parameters (\code{CNV.write} generic, currently not used).
 #' @details  Function shows the output of the CNV analysis with conumee 2. To use the results as input for GISTIC choose \code{what = 'gistic'}. To assign the resulting segments to their copy number state and their size (focal, arm-level or whole chromosome) choose \code{what = 'overview'}. The threshold for the log2-ratio to identify gains or losses is \code{0.1} by default. To access the results from the Segmented Block Bootstrapping, use \code{what = focal}.
@@ -834,7 +861,7 @@ setGeneric("CNV.write", function(object, ...) {
 
 #' @rdname CNV.write
 setMethod("CNV.write", signature(object = "CNV.analysis"), function(object, file = NULL, what = "segments", threshold = 0.1) {
-  w <- pmatch(what, c("probes", "bins", "detail", "segments", "gistic", "overview", "focal"))
+  w <- pmatch(what, c("probes", "bins", "detail", "segments", "gistic", "threshold", "focal"))
   if (w == 1) {
     if (length(object@fit) == 0)
       stop("fit unavailable, run CNV.fit")
@@ -844,7 +871,7 @@ setMethod("CNV.write", signature(object = "CNV.analysis"), function(object, file
 
     x <- data.frame(Chromosome = as.vector(seqnames(object@anno@probes)),
                     Start = start(object@anno@probes) - 1, End = end(object@anno@probes),
-                    Feature = names(object@anno@probes), row.names = NULL)
+                    Feature = rownames(object@fit$ratio), row.names = NULL)
 
     for (i in 1:ncol(object@fit$ratio)) {
       x <- cbind(x,round(object@fit$ratio[,i] - object@bin$shift[i], 3))
@@ -911,15 +938,16 @@ setMethod("CNV.write", signature(object = "CNV.analysis"), function(object, file
     x <- data.frame(matrix(ncol = 0, nrow = 0))
     for (i in 1:ncol(object@fit$ratio)) {
       y <- object@seg$summary[[i]]
-      y$seg.mean <- round(object@seg$summary[[i]]$seg.mean -object@bin$shift[i], 3)
+      y$seg.median <- round(object@seg$summary[[i]]$seg.median-object@bin$shift[i], 3)
+      y <- y[-which(is.element(y$chrom, c("chrX", "chrY"))),]
       x <- rbind(x, y)
     }
-    x <- x[,-c(7,8,9)]
+    x <- x[,-c(6,7,9)]
     colnames(x) <- c("Sample", "Chromosome", "Start_Position", "End_Position", "Num_Markers", "Seg.CN")
     x$Chromosome <- as.numeric(gsub("chr", "", x$Chromosome))
   } else if (w == 6) {
     if (length(object@seg) == 0)
-      stop("seg unavailable, run CNV.bin")
+      stop("seg unavailable, run CNV.segment")
     if (!is.null(file))
       if (!grepl(".seg$", file))
         warning("filename does not end in .seg")
@@ -927,59 +955,17 @@ setMethod("CNV.write", signature(object = "CNV.analysis"), function(object, file
     x <- data.frame(matrix(ncol = 0, nrow = 0))
     for (i in 1:ncol(object@fit$ratio)) {
       y <- object@seg$summary[[i]]
-      y$seg.mean <- round(object@seg$summary[[i]]$seg.mean -object@bin$shift[i], 3)
+      y$seg.median <- round(object@seg$summary[[i]]$seg.median -object@bin$shift[i], 3)
       x <- rbind(x, y)
     }
-    x <- x[,-c(7,8,9)]
+    x <- x[,-c(6,7,9)]
     colnames(x) <- c("Sample", "Chromosome", "Start_Position", "End_Position", "Num_Markers", "Seg.CN")
-    x$Range <- apply(x[, c(3,4)], 1, FUN = diff)
     new_col <- replicate(nrow(x), "balanced")
-    ind_g <- which(x$Seg.CN >= threshold)
-    ind_l <- which(x$Seg.CN <= -threshold)
-    new_col[ind_g] <- "gain"
-    new_col[ind_l] <- "loss"
+    new_col[which(x$Seg.CN >= threshold)] <- "gain"
+    new_col[which(x$Seg.CN <= -threshold)] <- "loss"
     x$Alteration <- new_col
-
-    x$CNA_Type <- replicate(nrow(x), "arm-level")
-
-    if (!is.null(object@anno@genome$pq)) {
-      ps <- GRanges(object@anno@genome$chr, IRanges(start = replicate(22,0),end = object@anno@genome$pq))
-      qs <- GRanges(object@anno@genome$chr, IRanges(start = object@anno@genome$pq + 1 ,end = object@anno@genome$size))
-      message(paste("evaluating ", nrow(x), " identified segments", sep = ""))
-
-      for (i in 1:22) {
-        segs <- GRanges(seqnames = paste("chr",i, sep = ""), IRanges(start = x[x$Chromosome==paste("chr",i, sep = ""),]$Start_Position,
-                                                                     end = x[x$Chromosome==paste("chr",i, sep = ""),]$End_Position))
-        fo_p <- findOverlaps(ranges(segs), ranges(ps)[i], type = "within")
-        ind_p <- queryHits(fo_p)
-        if (any(width(segs[ind_p])/width(ps[i]) < 0.95)) {
-          x[x$Chromosome == paste("chr", i, sep = ""),][ind_p,][which(width(segs[ind_p])/width(ps[i]) < 0.95),]$CNA_Type <- "focal"
-        }
-        fo_q <- findOverlaps(ranges(segs), ranges(qs)[i], type = "within")
-        ind_q <- queryHits(fo_q)
-        if (any(width(segs[ind_q])/width(qs[i]) < 0.95)) {
-          x[x$Chromosome == paste("chr", i, sep = ""),][ind_q,][which(width(segs[ind_q])/width(qs[i]) < 0.95),]$CNA_Type <- "focal"
-        }
-      }
-
-      for (i in 1:22) {
-        my_out <- x[x$Chromosome == paste("chr", i, sep = ""),7] / object@anno@genome[object@anno@genome$chr == paste("chr", i, sep = ""), 2] > 0.9
-        if (any(my_out)) {
-          x[x$Chromosome == paste("chr", i, sep = ""), ][my_out,]$CNA_Type <- "chromosome-level"
-        }
-      }
-    } else if (is.null(object@anno@genome$pq)) {
-
-      x$CNA_Type <- replicate(nrow(x), "focal")
-
-      for (i in 1:nrow(object@anno@genome)) {
-        my_out <- x[x$Chromosome == paste("chr", i, sep = ""),7] / object@anno@genome[object@anno@genome$chr == paste("chr", i, sep = ""), 2] > 0.9
-        if (any(my_out)) {
-          x[x$Chromosome == paste("chr", i, sep = ""), ][my_out,]$CNA_Type <- "chromosome-level"
-        }
-      }
-    }
   } else if (w == 7){
+    stop("Please run CNV.focal")
     x <- vector(mode='list', length = 6)
     x[[1]] <- object@detail$amp.bins
     x[[2]] <- object@detail$del.bins

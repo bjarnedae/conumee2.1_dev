@@ -30,8 +30,16 @@ setGeneric("CNV.load", function(input, ...) {
 #' @rdname CNV.load
 setMethod("CNV.load", signature(input = "MethylSet"), function(input, names = NULL) {
   object <- new("CNV.data")
+  object@date <- date()
 
-  object@intensity <- as.data.frame(minfi::getMeth(input) + minfi::getUnmeth(input))
+  combined.intensities.df <- as.data.frame(minfi::getMeth(input) + minfi::getUnmeth(input))
+  combined.intensities.l <- as.list(combined.intensities.df, all.names = TRUE)
+
+  for(i in 1:length(combined.intensities.l)){
+    names(combined.intensities.l[[i]]) <- rownames(combined.intensities.df)
+  }
+
+  object@intensity <- combined.intensities.l
 
   input.names <- grep("Name", setdiff(colnames(minfi::pData(input)),
                                       c("Basename", "filenames")), ignore.case = TRUE)
@@ -49,26 +57,9 @@ setMethod("CNV.load", signature(input = "MethylSet"), function(input, names = NU
 #' @rdname CNV.load
 setMethod("CNV.load", signature(input = "list"), function(input, names = NULL) {
   object <- new("CNV.data")
+  object@date <- date()
 
-  for(i in 1:length(input)){
-    if(nchar(names(input[[i]][1])) > 10) {
-      names(input[[i]]) <- substr(names(input[[i]]), 1, nchar(names(input[[i]]))-5)
-    }
-  }
-
-  if(length(unique(unlist(lapply(input, length)))) > 1){
-    warning("Multiple array types are used. Non-overlapping probes are temporarily set to 1 and are filtered out during CNV.fit(). Please set the correct overlap of probes when creating the annotation object with CNV.create_anno to ensure meaningful analysis.")
-  }
-
-  ind <- which.max(unlist(lapply(input, length)))
-  probes <- unique(names(input[[ind]]))
-
-  comb.int.df <- as.data.frame(matrix(ncol = 0, nrow = length(probes)))
-  for (i in 1:length(input)){
-    comb.int.df <- cbind(comb.int.df, input[[i]][probes])
-  }
-  colnames(comb.int.df) <- names(input)
-  object@intensity <- comb.int.df
+  object@intensity <- input
 
   if (!is.null(names))
     names(object) <- names
@@ -79,8 +70,7 @@ setMethod("CNV.load", signature(input = "list"), function(input, names = NULL) {
 })
 
 #' @rdname CNV.load
-setMethod("CNV.load", signature(input = "data.frame"), function(input,
-                                                                names = NULL) {
+setMethod("CNV.load", signature(input = "data.frame"), function(input, names = NULL) {
   object <- new("CNV.data")
   object@date <- date()
 
@@ -96,23 +86,30 @@ setMethod("CNV.load", signature(input = "data.frame"), function(input,
     input.n <- sapply(strsplit(colnames(input), "\\.", colnames(input))[input.i],
                       function(x) paste(x[!grepl("intensity", x, ignore.case = TRUE)],
                                         collapse = "."))
-    object@intensity <- as.data.frame(input[, input.i])
-    colnames(object@intensity) <- make.names(input.n, unique = TRUE)
+    combined.intensities.df <- as.data.frame(input[, input.i])
+    colnames(combined.intensities.df) <- make.names(input.n, unique = TRUE)
   } else if (any(grepl("signal", colnames(input), ignore.case = TRUE))) {
     input.i <- grep("signal", colnames(input), ignore.case = TRUE)
     input.n <- sapply(strsplit(colnames(input), "\\.", colnames(input))[input.i],
                       function(x) paste(x[!grepl("signal|methylated", x, ignore.case = TRUE)],
                                         collapse = "."))
-    if (!all(input.n[seq(1, length(input.i), 2)] == input.n[seq(2,
-                                                                length(input.i), 2)]))
+    if (!all(input.n[seq(1, length(input.i), 2)] == input.n[seq(2, length(input.i), 2)]))
       stop("names of both signal columns do not match.")
-    object@intensity <- as.data.frame(input[, input.i[seq(1, length(input.i),
-                                                          2)]] + input[, input.i[seq(2, length(input.i), 2)]])
-    colnames(object@intensity) <- make.names(input.n[seq(1, length(input.i),
-                                                         2)], unique = TRUE)
+
+    combined.intensities.df <- as.data.frame(input[, input.i[seq(1, length(input.i), 2)]] + input[, input.i[seq(2, length(input.i), 2)]])
+    colnames(combined.intensities.df) <- make.names(input.n[seq(1, length(input.i), 2)], unique = TRUE)
   } else {
-    object@intensity <- as.data.frame(input)
+    combined.intensities.df <- as.data.frame(input)
   }
+
+  combined.intensities.l <- as.list(combined.intensities.df, all.names = TRUE)
+
+  for(i in 1:length(combined.intensities.l)){
+    names(combined.intensities.l[[i]]) <- rownames(combined.intensities.df)
+  }
+
+  object@intensity <- combined.intensities.l
+
   if (!is.null(names))
     names(object) <- names
 
@@ -120,6 +117,7 @@ setMethod("CNV.load", signature(input = "data.frame"), function(input,
 
   return(object)
 })
+
 #' @rdname CNV.load
 setMethod("CNV.load", signature(input = "matrix"), function(input, names = NULL,...) {
   CNV.load(as.data.frame(input), names)
@@ -128,6 +126,7 @@ setMethod("CNV.load", signature(input = "matrix"), function(input, names = NULL,
 #' @rdname CNV.load
 setMethod("CNV.load", signature(input = "numeric"), function(input, names = NULL) {
   object <- new("CNV.data")
+  object@date <- date()
 
   if (is.null(names(input)))
     stop("intensities not given for all probes.")
@@ -139,7 +138,14 @@ setMethod("CNV.load", signature(input = "numeric"), function(input, names = NULL
     names(n) <- probes[-which(duplicated(probes))]
   }
 
-  object@intensity <- data.frame(sampleid = n)
+  combined.intensities.df <- data.frame(sampleid = n)
+  combined.intensities.l <- as.list(combined.intensities.df, all.names = TRUE)
+
+  for(i in 1:length(combined.intensities.l)){
+    names(combined.intensities.l[[i]]) <- rownames(combined.intensities.df)
+  }
+
+  object@intensity <- combined.intensities.l
 
   if (!is.null(names))
     names(object) <- names
@@ -161,7 +167,14 @@ setMethod("CNV.load", signature(input = "RnBeadRawSet"), function(input, names =
   rownames(combined_probes) <- substr(rownames(input@sites),1, 10)
   colnames(combined_probes) <- input@pheno$Sample_Name
 
-  object@intensity <- as.data.frame(combined_probes)
+  combined.intensities.df <- as.data.frame(combined_probes)
+  combined.intensities.l <- as.list(combined.intensities.df, all.names = TRUE)
+
+  for(i in 1:length(combined.intensities.l)){
+    names(combined.intensities.l[[i]]) <- rownames(combined.intensities.df)
+  }
+
+  object@intensity <- combined.intensities.l
 
   object <- CNV.check(object)
 
@@ -181,18 +194,16 @@ setGeneric("CNV.check", function(object) {
 
 #' @rdname CNV.check
 setMethod("CNV.check", signature(object = "CNV.data"), function(object) {
-  if (any(is.na(object@intensity))) {
-    warning("some intensities are NA, now set to 1.")
-    object@intensity[is.na(object@intensity)] <- 1
-  }
-  if (any(object@intensity < 0))
-    warning("some intensities are smaller than 0, now set to 1.")
-  object@intensity[object@intensity < 1] <- 1
-  if (any(colMeans(object@intensity) < 5000))
-    warning("intensities are abnormally low (< 5000).")
-  if (any(colMeans(object@intensity) > 50000))
-    warning("intensities are abnormally high (> 50000).")
 
+  if (any(unlist(lapply(object@intensity, function(x) any(is.na(x)))))) {
+    warning("some intensities are NA, now removed.")
+    object@intensity <- lapply(object@intensity, function(x) x[!is.na(x)])
+  }
+  if (any(unlist(lapply(object@intensity, function(x) any(x <= 0)))))
+    warning("some intensities are smaller than 0, now set to 1.")
+  for (i in 1:length(object@intensity)){
+    object@intensity[[i]][object@intensity[[i]]<=0] <- 1
+  }
   return(object)
 })
 
@@ -246,9 +257,8 @@ read.450k.url <- function(url = NULL, idat = NULL) {
     message(" - done.")
 }
 
-
 #' CNV.import
-#' @description Load combined signal intensities from .idat-Files generated with the Illumina Mouse array or the EPICv2 array. Next, use the resulting \code{data.frame} for \code{CNV.load}.
+#' @description Load combined signal intensities from .idat-Files generated with the Illumina Mouse array or the EPICv2 array. Next, use the resulting \code{data.frame} for \code{CNV.load}. This function is now deprecated. Please use minfi or sesame.
 #' @param array_type character. Choose either \code{"EPICv2"} or \code{"mouse"} as array_type. Default to \code{"EPICv2"}.
 #' @param directory Specify the folder that stores the .idat-Files.
 #' @param sample_sheet dataframe. Provide a sample sheet with at least three columns: \code{Sample_Name}, \code{Sentrix_ID} and \code{Sentrix_Position}. The spelling of the colnames must be exactly as shown.
