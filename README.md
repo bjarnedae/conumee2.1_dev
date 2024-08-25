@@ -111,7 +111,7 @@ The main CNV analysis is divided into four parts:
 - *Segmentation*: `CNV.segment` segments the genome into regions with the same copy-number state. This function wraps the `CNA`, `segment`, `segments.summary`, and `segments.p` functions from the `DNAcopy` package. Default parameters are optimized for 450k data but can be modified. For more details, see `?CNV.segment`.
 
 ```R
-x <- CNV.fit(load.data[2], load.control, anno)
+x <- CNV.fit(data.q[2], data.c, anno)
 x <- CNV.bin(x)
 x <- CNV.detail(x)
 x <- CNV.segment(x)
