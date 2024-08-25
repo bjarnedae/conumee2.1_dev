@@ -67,8 +67,8 @@ The intensity values from the 'methylated' and 'unmethylated' channels are combi
 ```R
 # create CNV data object from list of combined intensitiy values (SeSAMe)
 
-data.q <- CNV.load(lapply(sdfs.q, totalIntensities))
-data.c <- CNV.load(lapply(sdfs.c, totalIntensities))
+data.q <- CNV.load(do.call(cbind, lapply(sdfs.q, totalIntensities)))
+data.c <- CNV.load(do.call(cbind, lapply(sdfs.c, totalIntensities)))
 data.q
 data.c
 
