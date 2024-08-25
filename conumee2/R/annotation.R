@@ -95,7 +95,6 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
                                                     seqinfo = Seqinfo(object@genome$chr, object@genome$size)), 1, fix = "center")))
     }
 
-    # data("probes")
 
     if (is.element("450k", array_type)) {
       message("loading 450k annotations")
