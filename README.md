@@ -67,8 +67,8 @@ The intensity values from the 'methylated' and 'unmethylated' channels are combi
 ```R
 # create CNV data object from list of combined intensitiy values (SeSAMe)
 
-data.q <- CNV.load(lapply(sdfs.q, totalIntensities))
-data.c <- CNV.load(lapply(sdfs.c, totalIntensities))
+data.q <- CNV.load(do.call(cbind, lapply(sdfs.q, totalIntensities)))
+data.c <- CNV.load(do.call(cbind, lapply(sdfs.c, totalIntensities)))
 data.q
 data.c
 
@@ -111,7 +111,7 @@ The main CNV analysis is divided into four parts:
 - *Segmentation*: `CNV.segment` segments the genome into regions with the same copy-number state. This function wraps the `CNA`, `segment`, `segments.summary`, and `segments.p` functions from the `DNAcopy` package. Default parameters are optimized for 450k data but can be modified. For more details, see `?CNV.segment`.
 
 ```R
-x <- CNV.fit(load.data[2], load.control, anno)
+x <- CNV.fit(data.q[2], data.c, anno)
 x <- CNV.bin(x)
 x <- CNV.detail(x)
 x <- CNV.segment(x)
@@ -162,6 +162,8 @@ Please load your full cohort of query samples and follow the pipeline until `CNV
 - The `CNV.summaryplot` method converts segments from all analyzed query samples into non-overlapping, referential segments and the type of alteration (gain, loss or balanced) are summarized and visualized as percentages. The thresholds that are used for this summarization step are in line with default parameters used in GISTIC but can be adjusted by the user.
 
 - `CNV.heatmap` generates a copy-number heatmap for all analyzed query samples.
+
+If you would like to create summaryplots or heatmaps from a cohort that comprises methylation profiles from multiple array types, please use `CNV.combine` to combine the `CNV.analysis` objects after `CNV.fit`.
 
 ### 3.2 Text output
 
