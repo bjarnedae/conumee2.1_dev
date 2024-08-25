@@ -68,6 +68,7 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
       data("tbl_ucsc_hg38")
       message("using hg38 genome annotations from UCSC")
       tbl <- tbl_ucsc_hg38
+      remove(tbl_ucsc_hg38)
     }
 
     tbl.chromInfo <- tbl$chromInfo[match(object@genome$chr, tbl$chromInfo$chrom), "size"]
@@ -95,24 +96,21 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
                                                     seqinfo = Seqinfo(object@genome$chr, object@genome$size)), 1, fix = "center")))
     }
 
+    data("probes")
 
     if (is.element("450k", array_type)) {
       message("loading 450k annotations")
-      data("probes450k", envir = environment())
     }
 
     if (is.element("EPIC", array_type)) {
       message("loading EPIC annotations")
-      data("probesEPIC", envir = environment())
     }
 
     if (is.element("EPICv2", array_type)) {
       if(genome == "hg19"){
         message("loading EPICv2 annotations")
-        data("probesEPICv2", envir = environment())
       } else if(genome == "hg38"){
         message("loading EPICv2 annotations (hg38)")
-        data("probesEPICv2.hg38", envir = environment())
         probesEPICv2 <- probesEPICv2.hg38
       }
     }
@@ -147,6 +145,8 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
 
     object@probes <- sort(probes)
     message(" - ", length(object@probes), " probes used")
+
+    remove(probes450k, probesEPIC, probesEPICv2, probesEPICv2.hg38)
 
     if (!is.null(exclude_regions)) {
       message("importing regions to exclude from analysis")
