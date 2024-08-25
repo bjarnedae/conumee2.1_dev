@@ -215,7 +215,7 @@ read.450k.url <- function(url = NULL, idat = NULL) {
 
 
 #' CNV.import
-#' @description Load combined signal intensities from .idat-Files generated with the Illumina Mouse array or the EPICv2 array. Next, use the resulting \code{data.frame} for \code{CNV.load}. This function is now deprecated. Please use import data with the sesame package.
+#' @description Load combined signal intensities from .idat-Files generated with the Illumina Mouse array or the EPICv2 array. Next, use the resulting \code{data.frame} for \code{CNV.load}. This function is now deprecated. Please use sesame or minfi.
 #' @param array_type character. Choose either \code{"EPICv2"} or \code{"mouse"} as array_type. Default to \code{"EPICv2"}.
 #' @param directory Specify the folder that stores the .idat-Files.
 #' @param sample_sheet dataframe. Provide a sample sheet with at least three columns: \code{Sample_Name}, \code{Sentrix_ID} and \code{Sentrix_Position}. The spelling of the colnames must be exactly as shown.
