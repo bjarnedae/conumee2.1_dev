@@ -43,7 +43,7 @@ for(i in GEOs) getGEOSuppFiles(GEO = i, makeDirectory = FALSE)  # make sure to u
 
 ### 1.2 Load data
 
-The recommended input format for Illumina 450k and EPIC arrays are MSet objects generated from IDAT files using the `minfi` package. If you would like to load data from EPICv2 arrays, mouse arrays or multiple array generations at the same time (this example), we recommend loading and preprocessing the IDAT files with the `SeSAMe` package. Both packages provide extensive functionality to preprocess the IDAT files. 
+The recommended input format for Illumina 450k and EPIC arrays are MSet objects generated from IDAT files using the `minfi` package. If you would like to load data from EPICv2 arrays or mouse arrays, we recommend loading and preprocessing the IDAT files with the `SeSAMe` package. Both packages provide extensive functionality to preprocess the IDAT files. 
 
 ```R
 library("conumee2")
