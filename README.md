@@ -162,7 +162,7 @@ Please load your full cohort of query samples and follow the pipeline until `CNV
 - The `CNV.summaryplot` method converts segments from all analyzed query samples into non-overlapping, referential segments and the type of alteration (gain, loss or balanced) are summarized and visualized as percentages. The thresholds that are used for this summarization step are in line with default parameters used in GISTIC but can be adjusted by the user.
 
 - `CNV.heatmap` generates a copy-number heatmap for all analyzed query samples.
-- 
+
 If you would like to create summaryplots or heatmaps from a cohort that comprises methylation profiles from multiple array types, please use `CNV.combine` to combine the `CNV.analysis` objects after `CNV.fit`.
 
 ### 3.2 Text output
