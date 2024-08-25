@@ -95,21 +95,25 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
                                                     seqinfo = Seqinfo(object@genome$chr, object@genome$size)), 1, fix = "center")))
     }
 
-    data("probes")
+    # data("probes")
 
     if (is.element("450k", array_type)) {
       message("loading 450k annotations")
+      data("probes450k")
     }
 
     if (is.element("EPIC", array_type)) {
       message("loading EPIC annotations")
+      data("probesEPIC")
     }
 
     if (is.element("EPICv2", array_type)) {
       if(genome == "hg19"){
         message("loading EPICv2 annotations")
+        data("probesEPICv2")
       } else if(genome == "hg38"){
         message("loading EPICv2 annotations (hg38)")
+        data("probesEPICv2.hg38")
         probesEPICv2 <- probesEPICv2.hg38
       }
     }
