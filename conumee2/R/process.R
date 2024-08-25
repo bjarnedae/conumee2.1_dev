@@ -41,123 +41,85 @@ setGeneric("CNV.fit", function(query, ref, anno, ...) {
 #' @rdname CNV.fit
 setMethod("CNV.fit", signature(query = "CNV.data", ref = "CNV.data", anno = "CNV.anno"),
           function(query, ref, anno, intercept = TRUE) {
-            if (length(query@intensity) == 0)
+            if (ncol(query@intensity) == 0)
               stop("query intensities unavailable, run CNV.load")
-            if (length(ref@intensity) == 0)
+            if (ncol(ref@intensity) == 0)
               stop("reference set intensities unavailable, run CNV.load")
 
-            if (length(query@intensity) != 1)
+            if (ncol(query@intensity) != 1)
               message("using multiple query samples")
-            if (length(ref@intensity) == 1)
+            if (ncol(ref@intensity) == 1)
               warning("reference set contains only a single sample. use more samples for better results.")
 
-            query.probes.pr <- as.logical() # check if all probes from query samples are within the annotation object
-            for(i in 1:length(query@intensity)){
-              pr <- !(all(is.element(names(anno@probes), names(query@intensity[[i]]))) | all(is.element(mcols(anno@probes)$EPICv2_Loci, names(query@intensity[[i]]))))
-              query.probes.pr <- c(query.probes.pr, pr)
-            }
-            if(any(query.probes.pr)){
-              stop(paste("query intensities not given for all probes, sample(s)", which(query.probes.pr), sep = " "))
+            p <- unique(names(anno@probes))  # ordered by location
+
+            if (!all(is.element(p, rownames(query@intensity)))) {   # check if all probes are there
+              if("EPICv2_Loci" %in% colnames(values(anno@probes))) {   # if not, check if epicV2 identifiers are used
+                if(all(is.element(unique(names(anno@probes$EPICv2_Loci)), rownames(query@intensity)))) {   # if yes, change the data object
+                  query@intensity <- query@intensity[anno@probes$EPICv2_Loci, ]
+                  rownames(query@intensity) <- names(anno@probes)
+                } else {
+                  stop("query intensities not given for all probes.")
+                }
+              } else {
+                stop("query intensities not given for all probes.")
+              }
             }
 
-            ref.probes.pr <- as.logical() # check if all probes from reference samples are within the annotation object
-            for(i in 1:length(ref@intensity)){
-              pr <- !(all(is.element(names(anno@probes), names(ref@intensity[[i]]))) | all(is.element(mcols(anno@probes)$EPICv2_Loci, names(ref@intensity[[i]]))))
-              ref.probes.pr <- c(ref.probes.pr, pr)
-            }
-            if(any(ref.probes.pr)){
-              stop(paste("reference intensities not given for all probes, sample(s)", which(ref.probes.pr), sep = " "))
-            }
-
-            query.df <- CNV.df(query, anno)
-            ref.df <- CNV.df(ref, anno)
-
-            if(!all(substr(rownames(query.df), start = 1, stop = 10) == substr(rownames(ref.df), start = 1, stop = 10))){
-              stop("probe ids for query and reference samples are not matching.")
+            if (!all(is.element(p, rownames(ref@intensity)))) {
+              if("EPICv2_Loci" %in% colnames(values(anno@probes))) {
+                if(!all(is.element(unique(names(anno@probes$EPICv2_Loci)), rownames(ref@intensity)))) {
+                  ref@intensity <- ref@intensity[anno@probes$EPICv2_Loci, ]
+                  rownames(ref@intensity) <- names(anno@probes)
+                } else {
+                  stop("reference intensities not given for all probes.")
+                }
+              } else {
+                stop("reference intensities not given for all probes.")
+              }
             }
 
             object <- new("CNV.analysis")
-            object@name <- colnames(query.df)
             object@date <- date()
             object@fit$args <- list(intercept = intercept)
 
             object@anno <- anno
 
-            object@fit$coef <- data.frame(matrix(ncol = 0, nrow = ncol(ref.df)))
-            object@fit$ratio <- data.frame(matrix(ncol = 0, nrow = nrow(query.df)))
-            for (i in 1:ncol(query.df)) {
+            object@fit$coef <- data.frame(matrix(ncol = 0, nrow = ncol(ref@intensity)))
+            object@fit$ratio <- data.frame(matrix(ncol = 0, nrow = length(p)))
+            for (i in 1:ncol(query@intensity)) {
 
-              message(paste(colnames(query.df)[i]), " (",round(i/ncol(query.df)*100, digits = 3), "%", ")", sep = "")
-              r <- cor(query.df, ref.df)[i, ] < 0.99
+              message(paste(colnames(query@intensity)[i]), " (",round(i/ncol(query@intensity)*100, digits = 3), "%", ")", sep = "")
+              r <- cor(query@intensity[p, ], ref@intensity[p, ])[i, ] < 0.99
               if (any(!r)) message("query sample seems to also be in the reference set. not used for fit.")
               if (intercept) {
-                ref.fit <- lm(y ~ ., data = data.frame(y = log2(query.df[,i]), X = log2(ref.df[,r])))
+                ref.fit <- lm(y ~ ., data = data.frame(y = log2(query@intensity[p,i]), X = log2(ref@intensity[p, r])))
               } else {
-                ref.fit <- lm(y ~ . - 1, data = data.frame(y = log2(query.df[,i]), X = log2(ref.df[,r])))
+                ref.fit <- lm(y ~ . - 1, data = data.frame(y = log2(query@intensity[p,i]), X = log2(ref@intensity[p, r])))
               }
-              coefs <- rep(NA, ncol(ref.df))
-              coefs[r] <- as.numeric(ref.fit$coefficients[-1])
-              object@fit$coef <- cbind(object@fit$coef,coefs)
+              object@fit$coef <- cbind(object@fit$coef,as.numeric(ref.fit$coefficients[-1]))
 
               ref.predict <- predict(ref.fit)
               ref.predict[ref.predict < 0] <- 0
 
-              object@fit$ratio <- cbind(object@fit$ratio, log2(query.df[,i]) - ref.predict)
+              object@fit$ratio <- cbind(object@fit$ratio, log2(query@intensity[p,i]) - ref.predict[p])
             }
 
-            colnames(object@fit$coef) <- colnames(query.df)
-            rownames(object@fit$coef) <- colnames(ref.df)
-            colnames(object@fit$ratio) <- colnames(query.df)
-            rownames(object@fit$ratio) <- rownames(query.df)
+
+            colnames(object@fit$coef) <- colnames(query@intensity)
+            rownames(object@fit$coef) <- colnames(ref@intensity)
+            colnames(object@fit$ratio) <- colnames(query@intensity)
+            rownames(object@fit$ratio) <- p
 
             object@fit$noise <- as.numeric()
-            for (i in 1:ncol(query.df)) {
+            for (i in 1:ncol(query@intensity)) {
               object@fit$noise <- c(object@fit$noise, sqrt(mean((object@fit$ratio[-1,i] - object@fit$ratio[-nrow(object@fit$ratio),i])^2,na.rm = TRUE)))
             }
 
-            names(object@fit$noise) <- colnames(query.df)
+            names(object@fit$noise) <- colnames(query@intensity)
             return(object)
           })
 
-#' CNV.df
-#' @description Turn the probe intensities within a \code{CNV.data} object (list) into a dataframe.
-#' @param object \code{CNV.data} object.
-#' @param anno \code{CNV.anno} object.
-#' @return \code{CNV.data} object.
-#' @author Bjarne Daenekas \email{conumee@@hovestadt.bio}
-setGeneric("CNV.df", function(object, anno) {
-  standardGeneric("CNV.df")
-})
-
-#' @rdname CNV.df
-setMethod("CNV.df", signature(object = "CNV.data"), function(object, anno) {
-
-  probes <- anno@probes
-  if(all(nchar(lapply(object@intensity, function(x) names(x)[1])) == 15)){
-    p <- mcols(probes)$EPICv2_Loci
-    df.object <- as.data.frame(matrix(nrow = length(p) , ncol = 0))
-    for(i in 1:length(object@intensity)){
-      object.p <- object@intensity[[i]][p]
-      df.object <- cbind(df.object, object.p)
-    }
-    colnames(df.object) <- names(object@intensity)
-  } else{
-    df.object <- as.data.frame(matrix(nrow = length(probes) , ncol = 0))
-    for(i in 1:length(object@intensity)){
-      if(nchar(names(object@intensity[[i]][1])) == 15){
-        p <- mcols(probes)$EPICv2_Loci
-        object.p <- object@intensity[[i]][p]
-        names(object.p) <- substr(names(object.p), start = 1, stop = 10)
-      }else{
-        p <- names(probes)
-        object.p <- object@intensity[[i]][p]
-      }
-      df.object <- cbind(df.object, object.p)
-    }
-    colnames(df.object) <- names(object@intensity)
-  }
-  return(df.object)
-})
 
 #' CNV.bin
 #' @description Combine single probe intensitiy values into predefined bins.
@@ -202,15 +164,9 @@ setMethod("CNV.bin", signature(object = "CNV.analysis"), function(object) {
   if (length(object@fit) == 0)
     stop("fit unavailable, run CNV.fit")
 
-  if(all(nchar(rownames(object@fit$ratio)) == 15)){
-    n.probes <- mcols(object@anno@probes)$EPICv2_Loci
-  }else{
-    n.probes <- names(object@anno@probes)
-  }
-
   o1 <- as.matrix(findOverlaps(query = object@anno@bins, subject = object@anno@probes))
   o2 <- data.frame(bin = names(object@anno@bins)[o1[, "queryHits"]],
-                   probe = n.probes[o1[, "subjectHits"]], stringsAsFactors = FALSE)
+                   probe = names(object@anno@probes)[o1[, "subjectHits"]], stringsAsFactors = FALSE)
 
   object@bin$ratio <- vector(mode = "list", length = ncol(object@fit$ratio))
   object@bin$variance <- vector(mode = "list", length = ncol(object@fit$ratio))
@@ -235,6 +191,7 @@ setMethod("CNV.bin", signature(object = "CNV.analysis"), function(object) {
 
   return(object)
 })
+
 
 #' CNV.detail
 #' @description Combine single probe values within detail regions.
@@ -283,15 +240,9 @@ setMethod("CNV.detail", signature(object = "CNV.analysis"), function(object) {
   if (length(object@anno@detail) == 0) {
     message("no detail regions provided, define using CNV.create_anno")
   } else {
-
-    if(all(nchar(rownames(object@fit$ratio)) == 15)){
-      n.probes <- mcols(object@anno@probes)$EPICv2_Loci
-    }else{
-      n.probes <- names(object@anno@probes)
-    }
-
     d1 <- as.matrix(findOverlaps(query = object@anno@detail, subject = object@anno@probes))
-    d2 <- data.frame(detail = values(object@anno@detail)$name[d1[,"queryHits"]], probe = n.probes[d1[, "subjectHits"]], stringsAsFactors = FALSE)
+    d2 <- data.frame(detail = values(object@anno@detail)$name[d1[,"queryHits"]], probe = names(object@anno@probes[d1[, "subjectHits"]]),stringsAsFactors = FALSE)
+
 
     object@detail$ratio <- vector(mode = "list", length = ncol(object@fit$ratio))
     for (i in 1:ncol(object@fit$ratio)) {
@@ -299,7 +250,7 @@ setMethod("CNV.detail", signature(object = "CNV.analysis"), function(object) {
                                                d2[, "detail"]), median, na.rm = TRUE)[values(object@anno@detail)$name]
     }
     names(object@detail$ratio) <- colnames(object@fit$ratio)
-    object@detail$n_probes <- table(d2[, 1])[values(object@anno@detail)$name]
+    object@detail$probes <- table(d2[, 1])[values(object@anno@detail)$name]
 
   }
   return(object)
@@ -536,4 +487,34 @@ setMethod("CNV.focal", signature(object = "CNV.analysis"), function(object, sig_
   object@detail$del.cancer.genes <- cancer.genes.del
 
   return(object)
+})
+
+#' CNV.combine
+#' @description Combine two \code{CNV.analysis} objects. Please make sure that both objects were generated with the same reference samples and the same annotation object in \code{CNV.fit()}.
+#' @param query.1 \code{CNV.analysis} object 1.
+#' @param query.2 \code{CNV.analysis} object 2.
+#' @param ... Additional parameters (\code{CNV.combine} generic, currently not used).
+#' @return \code{CNV.analysis} object.
+#' @details This function combines two \code{CNV.analysis} objects. This is necessary if summaryplots or heatmaps should be generated for a cohort that comprises methylation profiles from multiple array types.
+#'
+#'x.1 <- CNV.fit(query.1, ref, anno)
+#'x.2 <- CNV.fit(query.2, ref, anno)
+#'
+#'x.combined <- CNV.combine(x.1, x.2)
+#'
+#' @author Bjarne Daenekas \email{conumee@@hovestadt.bio}
+#' @export
+setGeneric("CNV.combine", function(query.1, query.2, ...) {
+  standardGeneric("CNV.combine")
+})
+
+#' @rdname CNV.combine
+setMethod("CNV.combine", signature(query.1 = "CNV.analysis", query.2 = "CNV.analysis"),
+          function(query.1, query.2){
+
+            query.1@fit$coef <- cbind(query.1@fit$coef, query.2@fit$coef)
+            query.1@fit$ratio <- cbind(query.1@fit$ratio, query.2@fit$ratio)
+            query.1@fit$noise <- c(query.1@fit$noise, query.2@fit$noise)
+
+            return(query.1)
 })

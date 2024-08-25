@@ -3,7 +3,6 @@
 \name{CNV.load}
 \alias{CNV.load}
 \alias{CNV.load,MethylSet-method}
-\alias{CNV.load,list-method}
 \alias{CNV.load,data.frame-method}
 \alias{CNV.load,matrix-method}
 \alias{CNV.load,numeric-method}
@@ -14,8 +13,6 @@ CNV.load(input, ...)
 
 \S4method{CNV.load}{MethylSet}(input, names = NULL)
 
-\S4method{CNV.load}{list}(input, names = NULL)
-
 \S4method{CNV.load}{data.frame}(input, names = NULL)
 
 \S4method{CNV.load}{matrix}(input, names = NULL, ...)
@@ -25,7 +22,7 @@ CNV.load(input, ...)
 \S4method{CNV.load}{RnBeadRawSet}(input, names = NULL)
 }
 \arguments{
-\item{input}{Object of MethylSet class (minfi package), list class (sesame), data.frame class, matrix class or numeric class.}
+\item{input}{Object of MethylSet class (minfi package), data.frame class, matrix class or numeric class.}
 
 \item{...}{Additional parameters (\code{CNV.load} generic, currently not used).}
 

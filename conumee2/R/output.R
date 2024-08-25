@@ -816,8 +816,6 @@ setMethod("CNV.heatmap", signature(object = "CNV.analysis"), function(object,
 
 })
 
-
-
 #' CNV.write
 #' @description Output CNV analysis results as table.
 #' @param object \code{CNV.analysis} object.

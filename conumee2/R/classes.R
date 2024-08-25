@@ -57,7 +57,7 @@ setMethod("show", "CNV.anno", function(object) {
 #' d[1:2]
 #' @author Volker Hovestadt, Bjarne Daenekas \email{conumee@@hovestadt.bio}
 #' @export
-setClass("CNV.data", representation(date = "character", intensity = "list"))
+setClass("CNV.data", representation(date = "character", intensity = "data.frame"))
 
 #' @rdname CNV.data-class
 #' @param object \code{CNV.data} object
@@ -67,8 +67,8 @@ setMethod("show", "CNV.data", function(object) {
   if (length(object@intensity) == 0) {
     cat("  @intensity : unavailable, run CNV.load\n", sep = "")
   } else {
-    cat("  @intensity : available (", length(object@intensity), " samples, ",
-        length(object@intensity[[1]]), " probes)\n", sep = "")
+    cat("  @intensity : available (", ncol(object@intensity), " samples, ",
+        nrow(object@intensity), " probes)\n", sep = "")
   }
 })
 
@@ -77,20 +77,20 @@ setMethod("show", "CNV.data", function(object) {
 #' @param i index. \code{logical}, \code{numeric} or \code{character}.
 #' @export
 setMethod("[", signature(x = "CNV.data"), function(x, i) {
-  x@intensity <- x@intensity[i, drop = FALSE]
+  x@intensity <- x@intensity[, i, drop = FALSE]
   return(x)
 })
 
 #' @rdname CNV.data-class
 setMethod("names", signature(x = "CNV.data"), function(x) {
-  return(names(x@intensity))
+  return(colnames(x@intensity))
 })
 
 #' @rdname CNV.data-class
 #' @param value Replacement names.
 setReplaceMethod("names", signature(x = "CNV.data"), function(x, value) {
-  if (length(value) == length(x@intensity)) {
-    names(x@intensity) <- value
+  if (length(value) == ncol(x@intensity)) {
+    colnames(x@intensity) <- value
   } else {
     stop("number of names does not fit number of samples.")
   }
@@ -175,19 +175,26 @@ setReplaceMethod("names", signature(x = "CNV.analysis"), function(x, value) {
     colnames(x@fit$coef) <- value
     colnames(x@fit$ratio) <- value
     names(x@fit$noise) <- value
-    names(x@bin$ratio) <- value
-    names(x@bin$variance) <- value
-    names(x@bin$shift) <- value
-    names(x@detail$ratio) <- value
-    names(x@detail$amp.bins) <- value
-    names(x@detail$del.bins) <- value
-    names(x@detail$amp.detail.regions) <- value
-    names(x@detail$del.detail.regions) <- value
-    names(x@detail$amp.cancer.genes) <- value
-    names(x@detail$del.cancer.genes) <- value
-    names(x@seg$summary) <- value
-    names(x@seg$p) <- value
-
+    if(!is.null(x@bin$ratio)){
+      names(x@bin$ratio) <- value
+      names(x@bin$variance) <- value
+      names(x@bin$shift) <- value
+    }
+    if(!is.null(x@detail$ratio)){
+      names(x@detail$ratio) <- value
+    }
+    if(!is.null(x@detail$amp.bins)){
+      names(x@detail$amp.bins) <- value
+      names(x@detail$del.bins) <- value
+      names(x@detail$amp.detail.regions) <- value
+      names(x@detail$del.detail.regions) <- value
+      names(x@detail$amp.cancer.genes) <- value
+      names(x@detail$del.cancer.genes) <- value
+    }
+    if(!is.null(x@seg$summary)){
+      names(x@seg$summary) <- value
+      names(x@seg$p) <- value
+    }
   } else {
     stop("number of names must fit number of query samples.")
   }
