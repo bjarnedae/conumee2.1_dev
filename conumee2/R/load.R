@@ -238,12 +238,10 @@ setMethod("CNV.import", signature(array_type = "character", directory = "charact
             object <- new("data.frame")
 
             if(array_type == "mouse"){
-              data("CNV.import_mouse_data")
               anno <- CNV.import_mouse_data
             }
 
             if(array_type == "EPICv2"){
-              data("CNV.import_EPICv2")
               anno <- CNV.import_EPICv2
             }
 
@@ -292,7 +290,6 @@ CNV.define_detail <- function(array_type = "450k", gene = "predefined") {
       object <- detail_regions
       return(object)
     }
-    data("genes")
 
     if(any(gene %in% genes$SYMBOL == FALSE)){
       ind <- which(symbol %in% genes$SYMBOL == FALSE)
@@ -313,7 +310,6 @@ CNV.define_detail <- function(array_type = "450k", gene = "predefined") {
       object <- detail_regions_mouse
       return(object)
     }
-    data("genes_mm10")
 
     if(any(gene %in% genes_mm10$SYMBOL == FALSE)){
       ind <- which(gene %in% genes_mm10$SYMBOL == FALSE)

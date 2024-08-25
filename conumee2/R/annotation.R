@@ -214,8 +214,6 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
 
   } else if (array_type == "mouse") { # mouse annotations
 
-    data("mouse_annotation")
-
     if (chrXY) {
       object@genome <- data.frame(chr = paste("chr", c(1:19, "X", "Y"), sep = ""), stringsAsFactors = FALSE)
     } else {
