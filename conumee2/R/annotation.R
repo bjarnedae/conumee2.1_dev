@@ -228,18 +228,17 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
     object@gap <- sort(GRanges(as.vector(tbl.gap$chrom), IRanges(tbl.gap$chromStart + 1,
                                                                  tbl.gap$chromEnd), seqinfo = Seqinfo(object@genome$chr, object@genome$size)))
 
-    mouse_probes <- GRanges(as.vector(paste("chr",mouse_annotation[[3]]$CHR, sep = "")),
-                            IRanges(start = mouse_annotation[[3]]$MAPINFO,
-                                    end = mouse_annotation[[3]]$MAPINFO), seqinfo = Seqinfo(object@genome$chr, object@genome$size, genome = "mm10"))
+    ind.chr <- is.element(mouse_annotation[[3]]$CHR, unlist(lapply(strsplit(object@genome$chr, "r"), function(x)x[2])))
 
-    names(mouse_probes) <- mouse_annotation[[3]]$Name
-    mouse_probes$genes <- mouse_annotation[[3]]$genes
+    mouse_probes <- GRanges(as.vector(paste("chr", mouse_annotation[[3]]$CHR[ind.chr], sep = "")),
+                            IRanges(start = mouse_annotation[[3]]$MAPINFO[ind.chr],
+                                    end = mouse_annotation[[3]]$MAPINFO[ind.chr]), seqinfo = Seqinfo(object@genome$chr, object@genome$size, genome = "mm10"))
+
+    names(mouse_probes) <- mouse_annotation[[3]]$Name[ind.chr]
+    mouse_probes$genes <- mouse_annotation[[3]]$genes[ind.chr]
 
     # CpG probes only
-    mouse_probes <- mouse_probes[substr(names(mouse_probes),1, 2) == "cg" & is.element(as.vector(seqnames(mouse_probes)), object@genome$chr)]
-    seqlevels(mouse_probes)<- c(paste("chr", 1:19, sep = ""), "chrY", "chrX")
-    mouse_probes <- sort(mouse_probes)
-
+    mouse_probes <- sort(mouse_probes[substr(names(mouse_probes),1, 2) == "cg"])
     object@probes <- mouse_probes
 
     message(" - ", length(object@probes), " probes used")
