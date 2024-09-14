@@ -111,7 +111,7 @@ The main CNV analysis is divided into four parts:
 - *Segmentation*: `CNV.segment` segments the genome into regions with the same copy-number state. This function wraps the `CNA`, `segment`, `segments.summary`, and `segments.p` functions from the `DNAcopy` package. Default parameters are optimized for 450k data but can be modified. For more details, see `?CNV.segment`.
 
 ```R
-x <- CNV.fit(data.q[2], data.c, anno)
+x <- CNV.fit(data.q, data.c, anno)
 x <- CNV.bin(x)
 x <- CNV.detail(x)
 x <- CNV.segment(x)
@@ -139,7 +139,7 @@ The package supports multiple types of plots:
 - The `CNV.genomeplot` method produces plots of the complete genome or of one or multiple chromosomes. Intensity values of each bin are plotted in colored dots. Segments are shown as blue lines. If `CNV.focal` was used, significant genes are highlighted in red. See `?CNV.genomeplot` for more details.
 
 ```R
-CNV.genomeplot(x)
+CNV.genomeplot(x[2])
 ```
 
 ![40afa67d-f399-4ca7-8d88-beadb9b2f6ad_noid_genomeplot](https://github.com/user-attachments/assets/db576f98-8848-4dec-b6e6-8c2eaa9e597f)
