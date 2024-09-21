@@ -54,9 +54,9 @@ setMethod("CNV.fit", signature(query = "CNV.data", ref = "CNV.data", anno = "CNV
             p <- unique(names(anno@probes))  # ordered by location
 
             if (!all(is.element(p, rownames(query@intensity)))) {   # check if all probes are there
-              if("EPICv2_Loci" %in% colnames(values(anno@probes))) {   # if not, check if epicV2 identifiers are used
-                if(all(is.element(unique(names(anno@probes$EPICv2_Loci)), rownames(query@intensity)))) {   # if yes, change the data object
-                  query@intensity <- query@intensity[anno@probes$EPICv2_Loci, ]
+              if("IlmnID" %in% colnames(values(anno@probes))) {   # if not, check if full IlmnID identifiers are used
+                if(all(is.element(unique(anno@probes$IlmnID), rownames(query@intensity)))) {   # if yes, change the data object
+                  query@intensity <- query@intensity[anno@probes$IlmnID, ]
                   rownames(query@intensity) <- names(anno@probes)
                 } else {
                   stop("query intensities not given for all probes.")
@@ -67,9 +67,9 @@ setMethod("CNV.fit", signature(query = "CNV.data", ref = "CNV.data", anno = "CNV
             }
 
             if (!all(is.element(p, rownames(ref@intensity)))) {
-              if("EPICv2_Loci" %in% colnames(values(anno@probes))) {
-                if(!all(is.element(unique(names(anno@probes$EPICv2_Loci)), rownames(ref@intensity)))) {
-                  ref@intensity <- ref@intensity[anno@probes$EPICv2_Loci, ]
+              if("IlmnID" %in% colnames(values(anno@probes))) {
+                if(all(is.element(unique(anno@probes$IlmnID), rownames(ref@intensity)))) {
+                  ref@intensity <- ref@intensity[anno@probes$IlmnID, ]
                   rownames(ref@intensity) <- names(anno@probes)
                 } else {
                   stop("reference intensities not given for all probes.")

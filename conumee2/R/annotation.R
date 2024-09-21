@@ -235,6 +235,7 @@ CNV.create_anno <- function(bin_minprobes = 15, bin_minsize = 50000, bin_maxsize
                                     end = mouse_annotation[[3]]$MAPINFO[ind.chr]), seqinfo = Seqinfo(object@genome$chr, object@genome$size, genome = "mm10"))
 
     names(mouse_probes) <- mouse_annotation[[3]]$Name[ind.chr]
+    mouse_probes$IlmnID <- mouse_annotation[[3]]$IlmnID[ind.chr]
     mouse_probes$genes <- mouse_annotation[[3]]$genes[ind.chr]
 
     # CpG probes only
