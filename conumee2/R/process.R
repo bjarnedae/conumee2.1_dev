@@ -122,7 +122,7 @@ setMethod("CNV.fit", signature(query = "CNV.data", ref = "CNV.data", anno = "CNV
 
 
 #' CNV.bin
-#' @description Combine single probe intensitiy values into predefined bins.
+#' @description Combine single probe intensity values into predefined bins.
 #' @param object \code{CNV.analysis} object.
 #' @param ... Additional parameters (\code{CNV.bin} generic, currently not used).
 #' @return \code{CNV.analysis} object.
